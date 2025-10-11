@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stryo Fold - About Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/font.css" />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #1a1a1a;
+        color: #f5f5f7;
+        overflow-x: hidden;
+      }
+
+      .font-oxanium {
+        font-family: "Oxanium", sans-serif;
+      }
+      .font-space-grotesk {
+        font-family: "Space Grotesk", sans-serif;
+      }
+      .font-raleway {
+        font-family: "Raleway", sans-serif;
+      }
+
+      .hero-bg-about {
+        background-color: #1a1a1a;
+      }
+      .subtext-color {
+        color: #8e8e93;
+      }
+    </style>
+  </head>
+  <body class="bg-[#000000]">
+    <!-- Header Placeholder -->
+    <div id="header-placeholder"></div>
+
+    <main>
+      <!-- Hero Section -->
+      <section
+        class="h-[60vh] flex items-center justify-center text-center hero-bg-about"
+      >
+        <div class="container mx-auto px-6">
+          <h1 class="font-oxanium text-5xl md:text-7xl font-bold">
+            WE ARE STRYO
+          </h1>
+          <p
+            class="font-space-grotesk text-lg md:text-xl mt-4 max-w-3xl mx-auto subtext-color"
+          >
+            Engineering the future of urban mobility, one ride at a time.
+          </p>
+        </div>
+      </section>
+
+      <!-- Content Section -->
+      <div class="container mx-auto px-6 py-24 md:py-32 max-w-4xl">
+        <div class="space-y-16">
+          <div>
+            <h2
+              class="font-raleway text-3xl font-bold mb-4 border-l-4 border-[#00ffff] pl-4"
+            >
+              OUR MISSION
+            </h2>
+            <p class="subtext-color leading-relaxed">
+              At Stryo Electric, our mission is to redefine the urban commute.
+              We believe that personal transport should be seamless,
+              sustainable, and, above all, inspiring. We are committed to
+              creating innovative electric vehicles that not only solve the
+              challenges of city travel but also bring a sense of freedom and
+              excitement to the daily journey. We’re not just building a
+              product; we’re building a new way to experience the city.
+            </p>
+          </div>
+          <div>
+            <h2
+              class="font-raleway text-3xl font-bold mb-4 border-l-4 border-[#00ffff] pl-4"
+            >
+              OUR STORY
+            </h2>
+            <p class="subtext-color leading-relaxed">
+              Born from a passion for design and a frustration with conventional
+              transport, Stryo Electric started as a bold idea: what if your
+              vehicle could adapt to your life, not the other way around? This
+              question led us down a path of relentless innovation, culminating
+              in the Stryo Fold. Our journey is driven by a team of visionary
+              engineers and designers dedicated to pushing the boundaries of
+              what's possible in personal electric mobility. We are thinkers,
+              creators, and riders, united by the goal of making our cities more
+              accessible and our lives more extraordinary.
+            </p>
+          </div>
+          <div>
+            <h2
+              class="font-raleway text-3xl font-bold mb-8 border-l-4 border-[#00ffff] pl-4"
+            >
+              THE FOUNDERS
+            </h2>
+            <div class="grid md:grid-cols-2 gap-12 text-center">
+              <!-- Founder 1 -->
+              <div>
+                <img
+                  src="https://placehold.co/400x400/2d2d2d/f5f5f7?text=KG"
+                  alt="Kartikey Gupta"
+                  class="w-48 h-48 rounded-full mx-auto mb-4 object-cover"
+                />
+                <h3 class="font-space-grotesk text-2xl font-bold">
+                  Kartikey Gupta
+                </h3>
+                <p class="subtext-color">Co-Founder & Chief Visionary</p>
+                <p class="text-sm mt-2 text-gray-500">
+                  The architect of the Stryo vision, Kartikey leads product
+                  development with a relentless focus on futuristic design and
+                  unparalleled user experience.
+                </p>
+              </div>
+              <!-- Founder 2 -->
+              <div>
+                <img
+                  src="https://placehold.co/400x400/2d2d2d/f5f5f7?text=SG"
+                  alt="Shivansh Gupta"
+                  class="w-48 h-48 rounded-full mx-auto mb-4 object-cover"
+                />
+                <h3 class="font-space-grotesk text-2xl font-bold">
+                  Shivansh Gupta
+                </h3>
+                <p class="subtext-color">Co-Founder & Head of Engineering</p>
+                <p class="text-sm mt-2 text-gray-500">
+                  The engineering mastermind, Shivansh transforms ambitious
+                  concepts into reality, ensuring every Stryo vehicle is a
+                  masterpiece of precision and performance.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-placeholder"></div>
+    <script>
+      // Fetch and inject header
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+        });
+
+      // Fetch and inject footer
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+    </script>
+  </body>
+</html>

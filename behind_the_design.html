@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stryo Fold - Behind the Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/font.css" />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #1a1a1a;
+        color: #f5f5f7;
+        overflow-x: hidden;
+      }
+
+      .font-oxanium {
+        font-family: "Oxanium", sans-serif;
+      }
+      .font-space-grotesk {
+        font-family: "Space Grotesk", sans-serif;
+      }
+      .font-raleway {
+        font-family: "Raleway", sans-serif;
+      }
+
+      .subtext-color {
+        color: #8e8e93;
+      }
+
+      .hero-bg-prototype {
+        background-color: #000000;
+      }
+
+      /* Styles for the new video scroller */
+      .video-scroller-container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative; /* For positioning nav buttons */
+      }
+      .video-scroller {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+      }
+      .video-scroller::-webkit-scrollbar {
+        display: none;
+      }
+      .video-slide {
+        flex: 0 0 100%;
+        width: 100%;
+        scroll-snap-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 5%;
+      }
+      .video-slide .aspect-video {
+        width: 100%;
+        max-width: 960px; /* Limit max video width */
+      }
+
+      /* Video Navigation Buttons */
+      .video-nav-btn {
+        position: absolute;
+        top: 55%; /* Position relative to title */
+        transform: translateY(-50%);
+        z-index: 10;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .video-nav-btn:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+      .video-nav-btn.prev {
+        left: 2rem;
+      }
+      .video-nav-btn.next {
+        right: 2rem;
+      }
+    </style>
+  </head>
+  <body class="bg-[#1a1a1a]">
+    <!-- Header Placeholder -->
+    <div id="header-placeholder"></div>
+
+    <main>
+      <!-- Hero Section -->
+      <section
+        class="h-[60vh] flex items-center justify-center text-center hero-bg-prototype"
+      >
+        <div class="container mx-auto px-6">
+          <h1 class="font-oxanium text-5xl md:text-7xl font-bold">
+            FROM CONCEPT TO REALITY
+          </h1>
+          <p
+            class="font-space-grotesk text-lg md:text-xl mt-4 max-w-3xl mx-auto subtext-color"
+          >
+            The authentic, unpolished journey of the Stryo Fold.
+          </p>
+        </div>
+      </section>
+
+      <!-- Intro Section -->
+      <div class="container mx-auto px-6 py-24 md:py-32 max-w-3xl text-center">
+        <h2 class="font-raleway text-3xl font-bold mb-4">
+          THIS ISN'T JUST A RENDER
+        </h2>
+        <p class="subtext-color leading-relaxed">
+          Transparency is at the core of our engineering philosophy. We believe
+          in showing the real, tangible progress that turns a bold idea into a
+          revolutionary product. This is a look at our working prototype—the
+          heart, soul, and raw engineering that powers the Stryo Fold.
+        </p>
+      </div>
+
+      <!-- Video Gallery Section -->
+      <section class="video-scroller-container">
+        <div class="container mx-auto px-6">
+          <h2
+            class="font-raleway text-3xl font-bold mb-8 border-l-4 border-[#00ffff] pl-4"
+          >
+            PROTOTYPE IN ACTION
+          </h2>
+        </div>
+        <div class="video-scroller">
+          <!-- Video Slide 1 -->
+          <div class="video-slide">
+            <div class="aspect-video w-full rounded-lg overflow-hidden">
+              <iframe
+                src="https://www.youtube.com/embed/rql6Tu4JWVg?autoplay=1&mute=1&loop=1&playlist=rql6Tu4JWVg&controls=0&showinfo=0&rel=0"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                class="w-full h-full"
+              >
+              </iframe>
+            </div>
+          </div>
+          <!-- Video Slide 2 -->
+          <div class="video-slide">
+            <div class="aspect-video w-full rounded-lg overflow-hidden">
+              <iframe
+                src="https://www.youtube.com/embed/79yOVzXwoOA?autoplay=1&mute=1&loop=1&playlist=79yOVzXwoOA&controls=0&showinfo=0&rel=0"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                class="w-full h-full"
+              >
+              </iframe>
+            </div>
+          </div>
+          <!-- Add more video slides here if needed -->
+        </div>
+
+        <button id="prev-video" class="video-nav-btn prev">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button id="next-video" class="video-nav-btn next">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </section>
+
+      <!-- Gallery Section -->
+      <div class="container mx-auto px-6 py-24 md:py-32">
+        <h2
+          class="font-raleway text-3xl font-bold mb-8 border-l-4 border-[#00ffff] pl-4 max-w-4xl mx-auto"
+        >
+          RAW & REAL
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <img
+            src="https://i.ibb.co/mH0fb9g/Screenshot-2025-09-25-170641.png"
+            alt="Prototype detail shot 1"
+            class="rounded-lg w-full h-full object-cover"
+          />
+          <img
+            src="https://i.ibb.co/mG3bB6v/Screenshot-2025-09-25-170721.png"
+            alt="Prototype detail shot 2"
+            class="rounded-lg w-full h-full object-cover"
+          />
+          <img
+            src="https://i.ibb.co/wJMyNd4/Screenshot-2025-09-10-061345.png"
+            alt="Prototype side profile"
+            class="rounded-lg md:col-span-2 w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script>
+      // Fetch and inject header
+      fetch("header.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("header-placeholder").innerHTML = html;
+        });
+
+      // Fetch and inject footer
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("footer-placeholder").innerHTML = html;
+        });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const videoScroller = document.querySelector(".video-scroller");
+        const videoSlides = document.querySelectorAll(".video-slide");
+        const prevBtn = document.getElementById("prev-video");
+        const nextBtn = document.getElementById("next-video");
+        let currentVideoIndex = 0;
+
+        const goToVideoSlide = (index) => {
+          // Loop around if index is out of bounds
+          if (index < 0) {
+            index = videoSlides.length - 1;
+          } else if (index >= videoSlides.length) {
+            index = 0;
+          }
+
+          videoScroller.scrollTo({
+            left: videoScroller.offsetWidth * index,
+            behavior: "smooth",
+          });
+          currentVideoIndex = index;
+        };
+
+        prevBtn.addEventListener("click", () => {
+          goToVideoSlide(currentVideoIndex - 1);
+        });
+
+        nextBtn.addEventListener("click", () => {
+          goToVideoSlide(currentVideoIndex + 1);
+        });
+
+        // Optional: Update index on manual scroll for robustness
+        videoScroller.addEventListener("scroll", () => {
+          const slideWidth = videoScroller.offsetWidth;
+          if (slideWidth > 0) {
+            currentVideoIndex = Math.round(
+              videoScroller.scrollLeft / slideWidth
+            );
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
