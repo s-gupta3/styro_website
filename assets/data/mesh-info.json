@@ -1,0 +1,205 @@
+{
+  "seat": {
+    "heading": "Rider Seat Module",
+    "sections": [
+      {
+        "title": "Ergonomics",
+        "items": [
+          "Adaptive memory-foam core for long-ride support",
+          "Vented channels maintain airflow across the cushion",
+          "Lateral bolsters stabilize the rider during sharp turns"
+        ]
+      },
+      {
+        "title": "Materials",
+        "items": [
+          "Triple-stitched microfiber leather outer skin",
+          "Moisture-wicking mesh underlay with antimicrobial treatment",
+          "Shock-dampening gel layer bonded to the base plate"
+        ]
+      },
+      {
+        "title": "Adjustability",
+        "items": [
+          "Tool-free fore/aft slide range of 45 mm",
+          "Quick-set height shim kit (5, 10, 15 mm)",
+          "Integrated seat heater with three-stage control"
+        ]
+      }
+    ]
+  },
+  "rear_wheel": {
+    "heading": "Rear Wheel Assembly",
+    "sections": [
+      {
+        "title": "Construction",
+        "items": [
+          "Forged aluminum rim with weight-optimized spokes",
+          "Tubeless radial tire rated for 45° lean angles",
+          "Embedded RFID tag for lifecycle tracking"
+        ]
+      },
+      {
+        "title": "Drive Integration",
+        "items": [
+          "Direct-mount sprocket hub for belt and chain systems",
+          "Smart torque sensor reporting traction data",
+          "Self-aligning bearings with low-friction seals"
+        ]
+      },
+      {
+        "title": "Safety",
+        "items": [
+          "Run-flat insert supports up to 25 km after puncture",
+          "Reflective micro-bead coating for night visibility",
+          "Heat-dissipating fin channels near brake interface"
+        ]
+      }
+    ]
+  },
+  "brake": {
+    "heading": "Regenerative Brake System",
+    "sections": [
+      {
+        "title": "Performance",
+        "items": [
+          "320 mm floating rotor with ceramic composite pads",
+          "Active cooling ducts reduce fade under sustained load",
+          "Auto-calibration maintains optimal bite point"
+        ]
+      },
+      {
+        "title": "Regeneration",
+        "items": [
+          "Dual-channel energy recovery up to 1.4 kW",
+          "Smart modulation blends mechanical and regen braking",
+          "Thermal monitoring protects battery during rapid charge"
+        ]
+      },
+      {
+        "title": "Controls",
+        "items": [
+          "ABS integration with real-time slip detection",
+          "Handlebar feedback pulse indicates regen intensity",
+          "Service indicator LED embedded in caliper"
+        ]
+      }
+    ]
+  },
+  "battery": {
+    "heading": "Lithium Power Pack",
+    "sections": [
+      {
+        "title": "Capacity",
+        "items": [
+          "7.2 kWh usable energy with 98% discharge efficiency",
+          "Modular twin-pack design for hot-swap capability",
+          "Cold-weather mode maintains optimal cell temperature"
+        ]
+      },
+      {
+        "title": "Management",
+        "items": [
+          "AI-driven BMS balances cells every 6 minutes",
+          "Dual redundant safety relays for isolation",
+          "Encrypted diagnostics via Bluetooth LE"
+        ]
+      },
+      {
+        "title": "Charging",
+        "items": [
+          "Type-2 rapid charge: 20% to 80% in 24 minutes",
+          "Wireless pad compatibility up to 11 kW",
+          "Solar trickle port with MPPT controller"
+        ]
+      }
+    ]
+  },
+  "front_wheel": {
+    "heading": "Front Wheel Hub",
+    "sections": [
+      {
+        "title": "Dynamics",
+        "items": [
+          "Dual counter-rotating spokes reduce gyroscopic effect",
+          "Self-balancing gyro sensor for stability assist",
+          "High-grip silica tread optimized for wet performance"
+        ]
+      },
+      {
+        "title": "Suspension",
+        "items": [
+          "Magnetorheological damper linkage",
+          "Real-time preload adjustment via adaptive ECU",
+          "Carbon-fiber steering knuckle reduces unsprung mass"
+        ]
+      },
+      {
+        "title": "Monitoring",
+        "items": [
+          "Integrated accelerometer streaming to HUD",
+          "Tire pressure sensor with 0.1 PSI resolution",
+          "Predictive wear analytics synced to cloud"
+        ]
+      }
+    ]
+  },
+  "body": {
+    "heading": "Monocoque Body Frame",
+    "sections": [
+      {
+        "title": "Structure",
+        "items": [
+          "Aerospace-grade composite shell with foam core",
+          "Energy-absorbing crumple lattice beneath outer skin",
+          "Front access panels with magnetic latches"
+        ]
+      },
+      {
+        "title": "Aerodynamics",
+        "items": [
+          "CdA optimized to 0.21 using adaptive shutters",
+          "Underside diffusers channel airflow to battery",
+          "Active winglets deploy above 90 km/h"
+        ]
+      },
+      {
+        "title": "Lighting",
+        "items": [
+          "Full-width OLED strip with adaptive brightness",
+          "Dynamic turn signals with sequential animation",
+          "Ambient edge lighting synced to ride modes"
+        ]
+      }
+    ]
+  },
+  "throttle": {
+    "heading": "Drive-by-Wire Throttle",
+    "sections": [
+      {
+        "title": "Input",
+        "items": [
+          "Hall-effect sensor array with 12-bit resolution",
+          "Dual return springs for fail-safe redundancy",
+          "Haptic pulse feedback for traction events"
+        ]
+      },
+      {
+        "title": "Electronics",
+        "items": [
+          "Shielded CAN bus connector with EMI suppression",
+          "Microcontroller with triple watchdog architecture",
+          "User-configurable response curves via companion app"
+        ]
+      },
+      {
+        "title": "Weatherproofing",
+        "items": [
+          "IP67-rated enclosure with hydrophobic vent",
+          "UV-stable polymer grip with microtexture",
+          "Self-lubricating pivot bushings"
+        ]
+      }
+    ]
+  }
+}
