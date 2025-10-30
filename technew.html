@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Model Viewer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        /* Default page background */
+        /* background: initial;
+            background-color: #ffffff; */
+        background: radial-gradient(circle at center, #4a4846, #2a2b29);
+        min-height: 100vh;
+        overflow-x: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      /* Scrollable container with 10% margins */
+      .container {
+        width: 80%; /* 10% margin on each side = 80% width */
+        margin: 0 auto;
+        min-height: 100vh;
+        position: relative;
+      }
+
+      /* 3D viewer area */
+      #canvas-container {
+        width: 100%;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        touch-action: none;
+      }
+
+      /* Loading indicator */
+      #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 8px;
+        z-index: 100;
+        pointer-events: none;
+        font-size: 16px;
+      }
+
+      /* Tooltip for mesh information */
+      .mesh-tooltip {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        max-width: 320px;
+        background: rgba(18, 18, 18, 0.95);
+        color: #f5f5f5;
+        border-radius: 10px;
+        padding: 16px 18px;
+        pointer-events: none;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        font-family: inherit;
+        line-height: 1.5;
+        z-index: 200;
+        display: none;
+      }
+
+      .mesh-tooltip h3 {
+        margin: 0 0 10px;
+        font-size: 1.1rem;
+        letter-spacing: 0.02em;
+      }
+
+      .mesh-tooltip-section {
+        margin-top: 14px;
+      }
+
+      .mesh-tooltip-section h4 {
+        margin: 0 0 6px;
+        font-size: 0.95rem;
+        color: #90caf9;
+        letter-spacing: 0.01em;
+      }
+
+      .mesh-tooltip-section ul {
+        margin: 0;
+        padding-left: 18px;
+        list-style: disc;
+      }
+
+      .mesh-tooltip-section li {
+        margin-bottom: 4px;
+        font-size: 0.88rem;
+        color: #d6d6d6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading">Loading 3D Model...</div>
+
+    <div class="container">
+      <!-- Only the 3D Model Container remains (background text removed) -->
+      <div id="canvas-container"></div>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+      import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+
+      // Scene setup
+      const scene = new THREE.Scene();
+      scene.background = null; // Transparent to show gradient
+
+      const canvasContainer = document.getElementById("canvas-container");
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        canvasContainer.clientWidth / canvasContainer.clientHeight,
+        0.01,
+        1000
+      );
+      // Keep a much more distant initial camera so model appears smaller on load
+      camera.position.set(0, 2, 10);
+
+      // Interaction and tooltip state
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const hoverCandidates = [];
+      const raycastTargets = [];
+      const tooltipEl = document.createElement("div");
+      tooltipEl.className = "mesh-tooltip";
+      document.body.appendChild(tooltipEl);
+
+      let meshInfo = {};
+      let meshInfoLoaded = false;
+      let meshInfoKeys = new Set();
+      let modelReady = false;
+      let lastPointerEvent = null;
+      let needsRaycast = false;
+      let lastHoverKey = null;
+      const RAYCAST_THROTTLE = 80;
+      let lastRaycastTime = 0;
+
+      const normalizeMeshKey = (name) => {
+        if (!name) return null;
+        return name
+          .trim()
+          .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
+      };
+
+      const resolveMeshKey = (name) => {
+        const normalized = normalizeMeshKey(name);
+        if (!normalized) return null;
+        if (!meshInfoLoaded || meshInfoKeys.size === 0) {
+          return normalized;
+        }
+
+        if (meshInfoKeys.has(normalized)) {
+          return normalized;
+        }
+
+        const condensed = normalized.replace(/_/g, "");
+        for (const key of meshInfoKeys) {
+          if (normalized.startsWith(key) || normalized.endsWith(key)) {
+            return key;
+          }
+          if (normalized.includes(key)) {
+            return key;
+          }
+          const condensedKey = key.replace(/_/g, "");
+          if (condensedKey === condensed) {
+            return key;
+          }
+          if (
+            condensed.includes(condensedKey) ||
+            condensedKey.includes(condensed)
+          ) {
+            return key;
+          }
+        }
+
+        return null;
+      };
+
+      const refreshRaycastTargets = () => {
+        raycastTargets.length = 0;
+        if (!modelReady || !meshInfoLoaded) {
+          return;
+        }
+
+        hoverCandidates.forEach((obj) => {
+          const sourceName = obj.userData?.tooltipSource || obj.name;
+          const resolvedKey = resolveMeshKey(sourceName);
+          if (resolvedKey && meshInfo[resolvedKey]) {
+            obj.userData = obj.userData || {};
+            obj.userData.tooltipKey = resolvedKey;
+            raycastTargets.push(obj);
+          } else if (obj.userData) {
+            obj.userData.tooltipKey = null;
+          }
+        });
+
+        needsRaycast = true;
+      };
+
+      const findTooltipKey = (object) => {
+        let current = object;
+        while (current) {
+          if (current.userData && current.userData.tooltipKey) {
+            return current.userData.tooltipKey;
+          }
+          current = current.parent;
+        }
+        return null;
+      };
+
+      const hideTooltip = () => {
+        tooltipEl.style.display = "none";
+        lastHoverKey = null;
+      };
+
+      const updatePointer = (event) => {
+        const rect = event.target.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      };
+
+      const renderTooltip = (key, event) => {
+        const data = meshInfo[key];
+        if (!data) return;
+
+        if (lastHoverKey !== key) {
+          const sectionsHtml = data.sections
+            .map(
+              (section) => `
+                        <div class="mesh-tooltip-section">
+                            <h4>${section.title}</h4>
+                            <ul>
+                                ${section.items
+                                  .map((item) => `<li>${item}</li>`)
+                                  .join("")}
+                            </ul>
+                        </div>
+                    `
+            )
+            .join("");
+          tooltipEl.innerHTML = `<h3>${data.heading}</h3>${sectionsHtml}`;
+          lastHoverKey = key;
+        }
+
+        tooltipEl.style.display = "block";
+      };
+
+      const performRaycast = (timestamp) => {
+        if (!modelReady || !meshInfoLoaded || !lastPointerEvent) {
+          return false;
+        }
+
+        const now = timestamp || performance.now();
+        if (now - lastRaycastTime < RAYCAST_THROTTLE) {
+          return false;
+        }
+        lastRaycastTime = now;
+
+        raycaster.setFromCamera(pointer, camera);
+        if (raycastTargets.length === 0) {
+          return false;
+        }
+
+        const intersects = raycaster.intersectObjects(raycastTargets, true);
+
+        let matchKey = null;
+        for (const hit of intersects) {
+          const key = findTooltipKey(hit.object);
+          if (key && meshInfo[key]) {
+            matchKey = key;
+            break;
+          }
+        }
+
+        if (matchKey) {
+          renderTooltip(matchKey, lastPointerEvent);
+        } else if (tooltipEl.style.display === "block") {
+          hideTooltip();
+        }
+
+        return true;
+      };
+
+      fetch("./assets/data/mesh-info.json")
+        .then((response) => response.json())
+        .then((data) => {
+          meshInfo = data;
+          meshInfoLoaded = true;
+          meshInfoKeys = new Set(Object.keys(data));
+          refreshRaycastTargets();
+          needsRaycast = true;
+        })
+        .catch((err) => {
+          console.error("Failed to load mesh info file:", err);
+        });
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setSize(
+        canvasContainer.clientWidth,
+        canvasContainer.clientHeight
+      );
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      // Slightly lower exposure to avoid blown out speculars
+      renderer.toneMappingExposure = 1.0;
+      // Use physically correct light units for better energy conservation
+      renderer.physicallyCorrectLights = true;
+      canvasContainer.appendChild(renderer.domElement);
+
+      const handlePointerMove = (event) => {
+        lastPointerEvent = event;
+        updatePointer(event);
+        needsRaycast = true;
+      };
+
+      const handlePointerLeave = () => {
+        lastPointerEvent = null;
+        needsRaycast = false;
+        hideTooltip();
+      };
+
+      const handlePointerDown = () => {
+        lastPointerEvent = null;
+        needsRaycast = false;
+        hideTooltip();
+      };
+
+      renderer.domElement.addEventListener("pointermove", handlePointerMove);
+      renderer.domElement.addEventListener("pointerleave", handlePointerLeave);
+      renderer.domElement.addEventListener("pointerdown", handlePointerDown);
+      renderer.domElement.addEventListener("touchstart", handlePointerDown, {
+        passive: true,
+      });
+
+      // Lighting setup - bright and balanced
+      // Balanced lights: reduce overpowering key light so metallics don't clip to pure white
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      // Hemisphere: soft sky/ground; lower intensity to avoid washing out materials
+      const hemiLight = new THREE.HemisphereLight(0xcfefff, 0x222222, 0.45);
+      scene.add(hemiLight);
+
+      // Key directional light (softer)
+      const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.9);
+      directionalLight1.position.set(4.5, 5.5, 3.5);
+      scene.add(directionalLight1);
+
+      // Secondary directional to add shape
+      const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+      directionalLight2.position.set(-3, 2, -2);
+      scene.add(directionalLight2);
+
+      // Small fill to keep shadows readable
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+      fillLight.position.set(0, -1, 2);
+      scene.add(fillLight);
+
+      // Controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 100;
+      controls.maxDistance = 200;
+      controls.enableZoom = true; // Keep wheel zoom active
+      controls.enablePan = true; // Enable orbit panning when needed
+
+      const WHEEL_RELEASE_EPSILON = 0.5; // Distance tolerance before freeing page scroll
+      const allowPageScrollOnZoomLimit = (event) => {
+        const distance = camera.position.distanceTo(controls.target);
+        const zoomingOut = event.deltaY > 0;
+        const zoomingIn = event.deltaY < 0;
+        if (
+          (zoomingOut &&
+            distance >= controls.maxDistance - WHEEL_RELEASE_EPSILON) ||
+          (zoomingIn &&
+            distance <= controls.minDistance + WHEEL_RELEASE_EPSILON)
+        ) {
+          // Let native page scrolling proceed once zoom limits are reached
+          event.stopImmediatePropagation();
+        }
+      };
+
+      renderer.domElement.addEventListener(
+        "wheel",
+        allowPageScrollOnZoomLimit,
+        {
+          passive: false,
+          capture: true,
+        }
+      );
+
+      // DRACO Loader
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath(
+        "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
+      );
+
+      // GLTF Loader
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.setDRACOLoader(dracoLoader);
+
+      // Load model
+      gltfLoader.load(
+        "./assets/model/upxo.glb",
+        (gltf) => {
+          const model = gltf.scene;
+
+          // Single-pass material and geometry optimization with diagnostics
+          const meshInfos = [];
+          model.traverse((object) => {
+            if (object.isMesh) {
+              const geometry = object.geometry;
+              const material = object.material;
+
+              object.userData = object.userData || {};
+              if (!object.userData.tooltipSource) {
+                object.userData.tooltipSource = object.name || "";
+              }
+              hoverCandidates.push(object);
+
+              // Optimize geometry (compute only if missing)
+              if (geometry) {
+                if (!geometry.attributes.normal) {
+                  geometry.computeVertexNormals();
+                }
+                // Only compute bounding volumes if not already present
+                if (!geometry.boundingSphere) {
+                  geometry.computeBoundingSphere();
+                }
+                if (!geometry.boundingBox) {
+                  geometry.computeBoundingBox();
+                }
+              }
+
+              const resolvedKey = resolveMeshKey(
+                object.userData.tooltipSource || object.name
+              );
+
+              // Fix materials
+              if (material) {
+                material.side = THREE.DoubleSide;
+                material.needsUpdate = true;
+
+                // Set safe defaults for materials without maps
+                if (!material.map) {
+                  if ("color" in material)
+                    material.color = new THREE.Color(0xffffff);
+                  if ("metalness" in material) material.metalness = 0.1;
+                  if ("roughness" in material) material.roughness = 0.6;
+                }
+
+                // Reduce env map intensity if present to avoid blown highlights
+                if ("envMapIntensity" in material) {
+                  material.envMapIntensity = material.envMapIntensity || 0.9;
+                }
+
+                // Build diagnostic info in same pass
+                const info = {
+                  name: object.name || object.uuid,
+                  resolvedKey,
+                  map: material.map
+                    ? (material.map.image && material.map.image.src) ||
+                      (material.map.image && material.map.image.currentSrc) ||
+                      "has map"
+                    : null,
+                  normalMap: material.normalMap
+                    ? (material.normalMap.image &&
+                        material.normalMap.image.src) ||
+                      "has normalMap"
+                    : null,
+                  roughnessMap: material.roughnessMap
+                    ? "has roughnessMap"
+                    : null,
+                  metalnessMap: material.metalnessMap
+                    ? "has metalnessMap"
+                    : null,
+                  emissiveMap: material.emissiveMap ? "has emissiveMap" : null,
+                  metalness:
+                    "metalness" in material ? material.metalness : null,
+                  roughness:
+                    "roughness" in material ? material.roughness : null,
+                };
+                meshInfos.push(info);
+              }
+            }
+          });
+
+          console.group("Model PBR map diagnostic");
+          meshInfos.forEach((i) => console.log(i));
+          const grouped = meshInfos.reduce((acc, item) => {
+            const key = item.resolvedKey || "unmapped";
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+          }, {});
+          console.log("Tooltip grouping counts:", grouped);
+          console.groupEnd();
+
+          scene.add(model);
+          modelReady = true;
+          refreshRaycastTargets();
+          needsRaycast = true;
+
+          // Center and scale model
+          const box = new THREE.Box3().setFromObject(model);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+
+          model.position.sub(center);
+
+          const maxDim = Math.max(size.x, size.y, size.z);
+          // Set initial camera position in the middle of zoom range
+          camera.position.set(0, maxDim * 0.9, maxDim * 10.0);
+          camera.near = Math.max(0.001, maxDim / 100);
+          camera.far = Math.max(1000, maxDim * 100);
+          camera.updateProjectionMatrix();
+
+          controls.target.set(0, 0, 0);
+          controls.update();
+
+          document.getElementById("loading").style.display = "none";
+          console.log("Model loaded successfully");
+        },
+        (xhr) => {
+          if (xhr.total) {
+            const percent = ((xhr.loaded / xhr.total) * 100).toFixed(0);
+            document.getElementById(
+              "loading"
+            ).textContent = `Loading: ${percent}%`;
+          }
+        },
+        (error) => {
+          console.error("Failed to load model:", error);
+          document.getElementById("loading").innerHTML =
+            "Error loading model<br><small>Check console</small>";
+          document.getElementById("loading").style.color = "#ff4444";
+        }
+      );
+
+      // Animation loop
+      let isVisible = true;
+      let animationId = null;
+
+      document.addEventListener("visibilitychange", () => {
+        isVisible = !document.hidden;
+        if (isVisible && !animationId) {
+          animate();
+        }
+      });
+
+      function animate(time) {
+        if (!isVisible) {
+          animationId = null;
+          return;
+        }
+        animationId = requestAnimationFrame(animate);
+        controls.update();
+        if (needsRaycast) {
+          const ran = performRaycast(time);
+          if (ran) {
+            needsRaycast = false;
+          }
+        }
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Handle window resize with debouncing
+      let resizeTimeout;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          const width = canvasContainer.clientWidth;
+          const height = canvasContainer.clientHeight;
+
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+          renderer.setSize(width, height);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }, 150);
+      });
+
+      // Handle messages from parent window for viewport activation
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "activate") {
+          // Resume rendering if paused
+          if (!isVisible) {
+            isVisible = true;
+            if (!animationId) {
+              animate();
+            }
+          }
+        } else if (event.data.type === "deactivate") {
+          // Pause rendering when out of viewport
+          isVisible = false;
+          if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+          }
+        }
+      });
+
+      // Cleanup - comprehensive disposal
+      window.addEventListener("unload", () => {
+        // Cancel animation frame
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+
+        // Dispose all scene resources
+        scene.traverse((object) => {
+          if (object.geometry) {
+            object.geometry.dispose();
+          }
+          if (object.material) {
+            // Handle both single materials and arrays
+            const materials = Array.isArray(object.material)
+              ? object.material
+              : [object.material];
+            materials.forEach((mat) => {
+              // Dispose all texture maps
+              if (mat.map) mat.map.dispose();
+              if (mat.normalMap) mat.normalMap.dispose();
+              if (mat.roughnessMap) mat.roughnessMap.dispose();
+              if (mat.metalnessMap) mat.metalnessMap.dispose();
+              if (mat.emissiveMap) mat.emissiveMap.dispose();
+              if (mat.aoMap) mat.aoMap.dispose();
+              if (mat.bumpMap) mat.bumpMap.dispose();
+              if (mat.displacementMap) mat.displacementMap.dispose();
+              mat.dispose();
+            });
+          }
+        });
+
+        renderer.domElement.removeEventListener(
+          "wheel",
+          allowPageScrollOnZoomLimit,
+          true
+        );
+
+        renderer.dispose();
+        controls.dispose();
+        renderer.domElement.removeEventListener(
+          "pointermove",
+          handlePointerMove
+        );
+        renderer.domElement.removeEventListener(
+          "pointerleave",
+          handlePointerLeave
+        );
+        renderer.domElement.removeEventListener(
+          "pointerdown",
+          handlePointerDown
+        );
+        renderer.domElement.removeEventListener(
+          "touchstart",
+          handlePointerDown
+        );
+        if (tooltipEl.parentNode) {
+          tooltipEl.parentNode.removeChild(tooltipEl);
+        }
+        hoverCandidates.length = 0;
+        raycastTargets.length = 0;
+      });
+    </script>
+  </body>
+</html>
