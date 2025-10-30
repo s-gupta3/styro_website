@@ -2,19 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <meta name="description" content="Stryo Fold - The next generation of urban mobility" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stryo Fold - Unfold Your World</title>
-    <link rel="preload" href="assets/font.css" as="style" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/font.css" />
-    <!-- Replace runtime Tailwind with production build for better performance -->
-    <script src="https://cdn.tailwindcss.com" defer></script>
     <style>
-      /* Critical CSS */
       html {
         scroll-behavior: smooth;
-        height: 100%;
-        touch-action: manipulation; /* Improve touch performance */
       }
       /* Custom scrollbar for a cleaner look */
       ::-webkit-scrollbar {
@@ -65,9 +59,6 @@
         background-position: center;
         position: relative;
         transition: background-image 0.5s ease-in-out;
-        will-change: transform; /* GPU acceleration hint */
-        transform: translateZ(0); /* Force GPU acceleration */
-        backface-visibility: hidden; /* Reduce painting */
       }
 
       /* Background image styles for each section */
@@ -76,14 +67,16 @@
         background-position: center;
       }
       #specs {
-        position: relative;
-        overflow: hidden;
-        background: none;
-        pointer-events: none; /* Allow scroll through the section */
-      }
-      
-      #specs iframe {
-        pointer-events: auto; /* Re-enable interactions for iframe content */
+        background-image: linear-gradient(
+            to right,
+            #1a1a1a 0%,
+            rgba(26, 26, 26, 0) 30%,
+            rgba(26, 26, 26, 0) 70%,
+            #1a1a1a 100%
+          ),
+          var(--specs-bg-image, none);
+        background-size: cover;
+        background-position: center;
       }
       #order {
         background-color: #1a1a1a;
@@ -103,10 +96,6 @@
         scroll-snap-type: x mandatory;
         height: 100vh;
         width: 100%;
-        -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
-        scrollbar-width: none; /* Firefox */
-        overscroll-behavior-x: contain; /* Prevent overscroll */
-        will-change: transform; /* GPU acceleration hint */
       }
       .horizontal-scroller::-webkit-scrollbar {
         display: none;
@@ -122,9 +111,6 @@
         background-position: right center;
         position: relative;
         transition: background-image 0.5s ease-in-out;
-        transform: translateZ(0); /* Force GPU acceleration */
-        backface-visibility: hidden;
-        perspective: 1000px;
       }
 
       /* Progress Indicator */
@@ -207,7 +193,7 @@
       >
         <a href="#">
           <img
-            src="./assets/images/Stryo_transparent_LOGO.png"
+            src="../assets/images/Stryo_transparent_LOGO.png"
             alt="Stryo Electric Logo"
             class="h-10"
           />
@@ -234,22 +220,22 @@
           <div class="flex space-x-3">
             <button
               data-color="Sterling Silver"
-              data-image="./assets/images/order/grey.png"
+              data-image="../assets/images/order/grey.png"
               class="color-swatch w-4 h-4 md:w-6 md:h-6 bg-[#A9A7A5] rounded-full border-2 border-transparent active"
             ></button>
             <button
               data-color="Electric Blue"
-              data-image="./assets/images/order/blue.png"
+              data-image="../assets/images/order/blue.png"
               class="color-swatch w-4 h-4 md:w-6 md:h-6 bg-[#00A7E4] rounded-full border-2 border-transparent"
             ></button>
             <button
               data-color="Vibrant Orange"
-              data-image="./assets/images/order/orange.png"
+              data-image="../assets/images/order/orange.png"
               class="color-swatch w-4 h-4 md:w-6 md:h-6 bg-[#F26320] rounded-full border-2 border-transparent"
             ></button>
             <button
               data-color="Lime Green"
-              data-image="./assets/images/order/green.png"
+              data-image="../assets/images/order/green.png"
               class="color-swatch w-4 h-4 md:w-6 md:h-6 bg-[#B6F500] rounded-full border-2 border-transparent"
             ></button>
           </div>
@@ -379,14 +365,15 @@
 
       <!-- Section 3: Tech Specs -->
       <section id="specs" class="scroll-section">
-        <div style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;">
-          <iframe 
-            id="tech-frame" 
-            src="technew.html" 
-            style="width: 100%; height: 100%; border: none; position: relative;"
-            loading="lazy"
-          ></iframe>
-        </div>
+        <iframe
+          src="technew.html"
+          width="100%"
+          height="100%"
+          frameborder="0"
+          scrolling="no"
+          style="pointer-events: auto"
+        ></iframe>
+        <!-- Background image will be set via JavaScript, gradient remains -->
       </section>
 
       <!-- Section 4: Order -->
@@ -396,7 +383,7 @@
             <div class="md:col-span-3">
               <img
                 id="config-image"
-                src="./assets/images/order/grey.png"
+                src="../assets/images/order/grey.png"
                 alt="Configurable Stryo vehicle"
                 class="w-full h-auto mx-auto rounded-lg"
               />
@@ -448,69 +435,44 @@
     <div id="footer-placeholder"></div>
 
     <script>
-      // Performance monitoring
-      const PERF = {
-        start: performance.now(),
-        events: new Map()
-      };
-
-      // Optimize image loading
-      const imagePreloader = {
-        cache: new Map(),
-        load(url) {
-          if (this.cache.has(url)) return this.cache.get(url);
-          
-          const promise = new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-              this.cache.set(url, img);
-              resolve(img);
-            };
-            img.onerror = reject;
-            img.src = url;
-          });
-          
-          this.cache.set(url, promise);
-          return promise;
-        }
-      };
-
       document.addEventListener("DOMContentLoaded", () => {
-        PERF.events.set('domLoaded', performance.now() - PERF.start);
-        
         // --- DATA FOR DYNAMIC IMAGES ---
-        const images = {
+        const colorImageData = {
           "Sterling Silver": {
-            hero: "./assets/images/hero/hero_grey.png",
+            hero: "../assets/images/hero/hero_grey.png",
             features: [
-              "./assets/images/feature/feature1_grey.png",
-              "./assets/images/feature/feature2_grey.png",
-              "./assets/images/feature/feature3_grey.png",
+              "../assets/images/feature/feature1_grey.png",
+              "../assets/images/feature/feature2_grey.png",
+              "../assets/images/feature/feature3_grey.png",
             ],
+            specs: "../assets/images/specs/specs_grey.png", // Added specs image path
           },
           "Lime Green": {
-            hero: "./assets/images/hero/hero_grey.png",
+            hero: "../assets/images/hero/hero_green.png",
             features: [
-              "./assets/images/feature/feature1_green.png",
-              "./assets/images/feature/feature2_green.png",
-              "./assets/images/feature/feature3_green.png",
+              "../assets/images/feature/feature1_green.png",
+              "../assets/images/feature/feature2_green.png",
+              "../assets/images/feature/feature3_green.png",
             ],
+            specs: "../assets/images/specs/specs_green.png", // Added specs image path
           },
           "Vibrant Orange": {
-            hero: "./assets/images/hero/hero_orange.png",
+            hero: "../assets/images/hero/hero_orange.png",
             features: [
-              "./assets/images/feature/feature1_orange.png",
-              "./assets/images/feature/feature2_orange.png",
-              "./assets/images/feature/feature3_orange.png",
+              "../assets/images/feature/feature1_orange.png",
+              "../assets/images/feature/feature2_orange.png",
+              "../assets/images/feature/feature3_orange.png",
             ],
+            specs: "../assets/images/specs/specs_orange.png", // Added specs image path
           },
           "Electric Blue": {
-            hero: "./assets/images/hero/hero_blue.png",
+            hero: "../assets/images/hero/hero_blue.png",
             features: [
-              "./assets/images/feature/feature1_blue.png",
-              "./assets/images/feature/feature2_blue.png",
-              "./assets/images/feature/feature3_blue.png",
+              "../assets/images/feature/feature1_blue.png",
+              "../assets/images/feature/feature2_blue.png",
+              "../assets/images/feature/feature3_blue.png",
             ],
+            specs: "../assets/images/specs/specs_blue.png", // Added specs image path
           },
         };
 
@@ -522,8 +484,7 @@
         const nextBtn = document.getElementById("next-feature");
         const prevBtn = document.getElementById("prev-feature");
         const featuresSection = document.getElementById("features");
-        // Get the specs section reference
-        const specsSection = document.getElementById("specs");
+        const specsSection = document.getElementById("specs"); // Get the specs section
         const colorSwatches = document.querySelectorAll(".color-swatch");
         const configImage = document.getElementById("config-image");
         const priceDisplay = document.getElementById("price-display");
@@ -535,32 +496,22 @@
         let autoScrollInterval;
 
         // --- FUNCTIONS ---
-        updateWebsiteTheme = async (color) => {
-          const colorImages = images[color];
-          if (!colorImages) return;
+        const updateWebsiteTheme = (color) => {
+          const images = colorImageData[color];
+          if (!images) return;
 
-          // Start all image loads in parallel (skip specs images as they don't exist)
-          const loadPromises = [
-            imagePreloader.load(colorImages.hero),
-            ...colorImages.features.map(url => imagePreloader.load(url))
-          ];
+          heroSection.style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0) 50%), url('${images.hero}')`;
 
-          try {
-            // Wait for all images to load
-            await Promise.all(loadPromises);
+          // Set the background image for the specs section using CSS variable
+          specsSection.style.setProperty(
+            "--specs-bg-image",
+            `url('${images.specs}')`
+          );
 
-            // Apply images only after they're loaded
-            requestAnimationFrame(() => {
-              heroSection.style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0) 50%), url('${colorImages.hero}')`;
-              
-              slides.forEach((slide, index) => {
-                const imageUrl = colorImages.features[index] || colorImages.features[0];
-                slide.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0) 80%), url('${imageUrl}')`;
-              });
-            });
-          } catch (error) {
-            console.error('Failed to load images:', error);
-          }
+          slides.forEach((slide, index) => {
+            const imageUrl = images.features[index] || images.features[0];
+            slide.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0) 80%), url('${imageUrl}')`;
+          });
         };
 
         const goToSlide = (slideIndex) => {
@@ -617,50 +568,25 @@
           }
         };
 
-        // --- EVENT LISTENERS & INITIALIZATION with Performance Optimizations ---
-        const progressBarFragment = document.createDocumentFragment();
+        // --- EVENT LISTENERS & INITIALIZATION ---
         slides.forEach((_, i) => {
           const barContainer = document.createElement("div");
           barContainer.classList.add("progress-bar-container");
           const bar = document.createElement("div");
           bar.classList.add("progress-bar");
           barContainer.appendChild(bar);
-          progressBarFragment.appendChild(barContainer);
+          progressIndicator.appendChild(barContainer);
         });
-        progressIndicator.appendChild(progressBarFragment);
         const progressBars = document.querySelectorAll(".progress-bar");
 
-        // Optimize scroll performance
-        let scrollTimeout;
-        let lastScrollTime = 0;
-        const SCROLL_THROTTLE = 16; // ms between scroll updates
-
-        // Throttled scroll handler
-        scroller.addEventListener("scroll", () => {
-          const now = performance.now();
-          if (now - lastScrollTime > SCROLL_THROTTLE) {
-            requestAnimationFrame(updateActiveSlide);
-            lastScrollTime = now;
-          }
-        }, { passive: true });
-
-        // Optimized button handlers with debouncing
+        scroller.addEventListener("scroll", updateActiveSlide);
         nextBtn.addEventListener("click", () => {
-          if (scrollTimeout) return;
-          scrollTimeout = setTimeout(() => {
-            goToSlide((currentSlide + 1) % slides.length);
-            startAutoScroll();
-            scrollTimeout = null;
-          }, 100);
+          goToSlide((currentSlide + 1) % slides.length);
+          startAutoScroll();
         });
-        
         prevBtn.addEventListener("click", () => {
-          if (scrollTimeout) return;
-          scrollTimeout = setTimeout(() => {
-            goToSlide((currentSlide - 1 + slides.length) % slides.length);
-            startAutoScroll();
-            scrollTimeout = null;
-          }, 100);
+          goToSlide((currentSlide - 1 + slides.length) % slides.length);
+          startAutoScroll();
         });
 
         featuresSection.addEventListener("mouseenter", () => {
@@ -702,42 +628,6 @@
         });
 
         updateWebsiteTheme("Sterling Silver");
-
-        // Handle tech iframe interactions
-        const techFrame = document.getElementById('tech-frame');
-        
-        // Handle scroll behavior
-        let isInViewport = false;
-        
-        const checkIfInViewport = () => {
-          const rect = specsSection.getBoundingClientRect();
-          const isVisible = (rect.top <= 0 && rect.bottom >= 0) || 
-                          (rect.top >= 0 && rect.top <= window.innerHeight);
-          
-          if (isVisible !== isInViewport) {
-            isInViewport = isVisible;
-            if (isVisible) {
-              techFrame.contentWindow.postMessage({ type: 'activate' }, '*');
-            } else {
-              techFrame.contentWindow.postMessage({ type: 'deactivate' }, '*');
-            }
-          }
-        };
-
-        // Check viewport on scroll
-        window.addEventListener('scroll', checkIfInViewport, { passive: true });
-        
-        // Listen for color changes to sync with the 3D model
-        window.addEventListener('message', (event) => {
-          if (event.data.type === 'modelColorChange') {
-            // Update color swatches if needed
-            colorSwatches.forEach(swatch => {
-              if (swatch.dataset.color === event.data.color) {
-                swatch.click();
-              }
-            });
-          }
-        });
 
         fetch("footer.html")
           .then((response) => response.text())
